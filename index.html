@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Órgano Antiguo</title>
+    <style>
+        body { 
+            margin: 0; 
+            background: #000; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            height: 100vh; 
+            touch-action: none; 
+            overflow: hidden; 
+        }
+
+        .contenedor { 
+            position: relative; 
+            width: 100vw; 
+            max-width: 900px; 
+            line-height: 0; 
+            user-select: none; 
+            -webkit-user-select: none; 
+        }
+
+        img { 
+            width: 100%; 
+            height: auto; 
+            pointer-events: none; 
+        }
+        
+        /* Áreas táctiles */
+        .tecla { 
+            position: absolute; 
+            cursor: pointer; 
+            display: block; 
+            -webkit-tap-highlight-color: transparent; 
+        }
+
+        /* Capas: Blancas abajo (z-index 1), Negras arriba (z-index 10) */
+        .blanca { top: 0; height: 100%; z-index: 1; }
+        
+        .negra { top: 0; height: 55%; z-index: 10; background: rgba(0,0,0,0.01); }
+        
+        /* Coordenadas de las piezas */
+        #C2 { left: 0%; width: 14.2%; }
+        #D2 { left: 14.2%; width: 14.2%; }
+        #E2 { left: 28.4%; width: 14.2%; }
+        #F2 { left: 42.6%; width: 14.2%; }
+        #G2 { left: 56.8%; width: 14.2%; }
+        #A2 { left: 71.0%; width: 14.2%; }
+        #B2 { left: 85.2%; width: 14.2%; }
+
+        #Cs2 { left: 9.5%; width: 9.5%; }
+        #Ds2 { left: 23.5%; width: 9.5%; }
+        #Fs2 { left: 52%; width: 9.5%; }
+        #Gs2 { left: 66%; width: 9.5%; }
+        #Bb2 { left: 80%; width: 9.5%; }
+    </style>
+</head>
+<body>
+
+<div class="contenedor">
+    <img src="Piano.png"> 
+    
+    <div id="C2" class="tecla blanca" onpointerdown="sonar('C2')"></div>
+    <div id="D2" class="tecla blanca" onpointerdown="sonar('D2')"></div>
+    <div id="E2" class="tecla blanca" onpointerdown="sonar('E2')"></div>
+    <div id="F2" class="tecla blanca" onpointerdown="sonar('F2')"></div>
+    <div id="G2" class="tecla blanca" onpointerdown="sonar('G2')"></div>
+    <div id="A2" class="tecla blanca" onpointerdown="sonar('A2')"></div>
+    <div id="B2" class="tecla blanca" onpointerdown="sonar('B2')"></div>
+
+    <div id="Cs2" class="tecla negra" onpointerdown="sonar('Cs2')"></div>
+    <div id="Ds2" class="tecla negra" onpointerdown="sonar('Ds2')"></div>
+    <div id="Fs2" class="tecla negra" onpointerdown="sonar('Fs2')"></div>
+    <div id="Gs2" class="tecla negra" onpointerdown="sonar('Gs2')"></div>
+    <div id="Bb2" class="tecla negra" onpointerdown="sonar('Bb2')"></div>
+</div>
+
+<script>
+    const sonidos = {};
+    const notas = ['C2', 'Cs2', 'D2', 'Ds2', 'E2', 'F2', 'Fs2', 'G2', 'Gs2', 'A2', 'Bb2', 'B2'];
+    
+    // SECUENCIA DEL MANUSCRITO
+    const SECUENCIA_SECRETA = ['D2', 'A2', 'Bb2', 'G2', 'Cs2']; 
+    let secuenciaUsuario = [];
+
+    // Cargar sonidos
+    notas.forEach(n => {
+        sonidos[n] = new Audio(n + '.mp3');
+        sonidos[n].preload = 'auto';
+    });
+    const sonidoExito = new Audio('OpenDoor.mp3');
+    const sonidoError = new Audio('error.mp3');
+
+    function sonar(nota) {
+        if (window.event) event.stopPropagation();
+        
+        // Reproducir nota
+        const s = sonidos[nota].cloneNode();
+        s.play();
+
+        // Validar secuencia
+        secuenciaUsuario.push(nota);
+        const pasoActual = secuenciaUsuario.length - 1;
+
+        if (secuenciaUsuario[pasoActual] !== SECUENCIA_SECRETA[pasoActual]) {
+            setTimeout(() => { sonidoError.play(); }, 150);
+            secuenciaUsuario = []; 
+            return;
+        }
+
+        if (secuenciaUsuario.length === SECUENCIA_SECRETA.length) {
+            setTimeout(() => {
+                sonidoExito.play();
+                secuenciaUsuario = []; 
+            }, 400);
+        }
+    }
+
+    // Bloquear zoom involuntario
+    document.addEventListener('touchstart', (e) => {
+        if (e.touches.length > 1) e.preventDefault();
+    }, {passive: false});
+</script>
+</body>
+</html>
